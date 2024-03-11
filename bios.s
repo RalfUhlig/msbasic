@@ -15,10 +15,6 @@ LOAD:
 SAVE:
                 RTS
                 
-; Dummy function for ISCNTC.
-ISCNTC:
-                RTS
-
 ; Input a character from the seriel interface.
 ; On return, carry flag indicates whether a key was pressed.
 ; If a key was pressed, the key value will be in the A register.
