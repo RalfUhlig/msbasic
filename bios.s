@@ -1,6 +1,15 @@
 .setcpu "65c02"
-.segment "BIOS"
 .debuginfo
+
+.zeropage
+                .org ZP_START0
+READ_PTR:       .res 1
+WRITE_PTR:      .res 1
+
+.segment "INPUT_BUFFER"
+INPUT_BUFFER:   .res 256
+
+.segment "BIOS"
 
 ACIA_DATA = $5000 ; 6551 Data Register.
 ACIA_STATUS = $5001 ; 6551 Status Register.
@@ -21,10 +30,9 @@ SAVE:
 ; Modifies: flags, A
 MONRDKEY:
 CHRIN:
-                LDA ACIA_STATUS
-                AND #$08
+                JSR BUFFER_SIZE
                 BEQ @NO_KEY_PRESSED
-                LDA ACIA_DATA
+                JSR READ_BUFFER
                 JSR CHROUT            ; Echo
                 SEC                   ; Indicate key was pressed.
                 RTS
@@ -45,9 +53,54 @@ CHROUT:
                 PLA
                 RTS
 
+; Initialize circular input buffer.
+; Modifies: flag, A
+INIT_BUFFER:
+                LDA READ_PTR    ; Set write pointer equal to read pointer.
+                STA WRITE_PTR
+                RTS
+
+; Write a character from the A register to the input buffer.
+; Modifies: flags
+WRITE_BUFFER:
+                PHX
+                LDX WRITE_PTR
+                STA INPUT_BUFFER, X
+                INC WRITE_PTR
+                PLX
+                RTS
+
+; Read a character from the input buffer to the A register.
+; Modifies: flags, A
+READ_BUFFER:
+                PHX
+                LDX READ_PTR
+                LDA INPUT_BUFFER, X
+                INC READ_PTR
+                PLX
+                RTS
+
+; Get number of unread bytes in the A register.
+; Modifies: flags, A
+BUFFER_SIZE:
+                LDA WRITE_PTR
+                SEC
+                SBC READ_PTR
+                RTS
+
+; Interrupt request handler.
+IRQ_HANDLER:
+                PHA
+                LDA ACIA_STATUS   ; Reset interrupt flag.
+                ; For now, assume the only source of interrupts in the ACIA.
+                LDA ACIA_DATA     ; Read character from seriel interface.
+                JSR WRITE_BUFFER  ; Store character in the buffer.
+                PLA
+                RTI
+
 .include "wozmon.s"
 
 .segment "RESETVEC"
                 .word   $0F00          ; NMI vector
                 .word   RESET          ; RESET vector
-                .word   $0000          ; IRQ vector
+                .word   IRQ_HANDLER    ; IRQ vector
