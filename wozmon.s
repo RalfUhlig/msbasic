@@ -180,9 +180,9 @@ PRHEX:
 ECHO:
                 STA     ACIA_DATA      ; Output character.
                 PHA                    ; Save A.
-                LDA     #$FF           ; Initialize delay loop.
-TX_DELAY:
-                DEC
-                BNE     TX_DELAY       ; Loop until A is zero.
+TX_WAIT:
+                LDA     ACIA_STATUS    ; Wait for the charater to be send.
+                AND     #$10
+                BEQ     TX_WAIT
                 PLA                    ; Restore A.
                 RTS                    ; Return.
