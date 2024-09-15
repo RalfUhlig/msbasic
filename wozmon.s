@@ -18,7 +18,13 @@ RESET:
                 CLI
                 LDA     #$1F           ; 19200bps, 8N1.
                 STA     ACIA_CTRL
-                LDY     #$89           ; No parity, no echo, rx interrupts. B7 set fo later code.
+                LDY     #$89           ; Bit 5 = 0: No parity 
+                                       ; Bit 4 = 0: No echo 
+                                       ; Bit 3 = 1: ~RTS low 
+                                       ; Bit 2 = 0. TX interrupts disabled
+                                       ; Bit 1 = 0: RX interrupts enabled
+                                       ; Bit 0 = 1: DTR disabled 
+                                       ; Bit 7 = 0: For later code
                 STY     ACIA_CMD
 
 NOTCR:
