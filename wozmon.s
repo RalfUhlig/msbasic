@@ -23,7 +23,7 @@ RESET:
                                        ; Bit 3 = 1: ~RTS low 
                                        ; Bit 2 = 0. TX interrupts disabled
                                        ; Bit 1 = 0: RX interrupts enabled
-                                       ; Bit 0 = 1: DTR disabled 
+                                       ; Bit 0 = 1: ~DTR low 
                                        ; Bit 7 = 0: For later code
                 STY     ACIA_CMD
 

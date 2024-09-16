@@ -34,6 +34,15 @@ CHRIN:
                 BEQ @NO_KEY_PRESSED
                 JSR READ_BUFFER
                 JSR CHROUT            ; Echo
+                PHA
+                JSR BUFFER_SIZE       ; Check if buffer is still mostly full.
+                CMP #$B0
+                BCS @MOSTLY_FULL
+                LDA ACIA_CMD          ; Set ~DTR to low by setting bit 0 to 1.
+                ORA #$01
+                STA ACIA_CMD
+@MOSTLY_FULL:
+                PLA
                 SEC                   ; Indicate key was pressed.
                 RTS
 @NO_KEY_PRESSED:
@@ -95,6 +104,13 @@ IRQ_HANDLER:
                 ; For now, assume the only source of interrupts in the ACIA.
                 LDA ACIA_DATA     ; Read character from seriel interface.
                 JSR WRITE_BUFFER  ; Store character in the buffer.
+                JSR BUFFER_SIZE   ; Check if the buffer is mostly full.
+                CMP #$F0
+                BCC @NOT_FULL
+                LDA ACIA_CMD      ; Set ~DTR to high by setting bit 0 to 0.
+                AND #$FE
+                STA ACIA_CMD
+@NOT_FULL:
                 PLA
                 RTI
 
