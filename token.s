@@ -78,6 +78,11 @@
 		keyword_rts "PRT", PRT
 .endif
 		keyword_rts "NEW", NEW
+.ifdef BB6502
+		keyword_rts "LCDINIT", LCDINIT
+		keyword_rts "LCDCMD", LCDCMD
+		keyword_rts "LCDPRINT", LCDPRINT
+.endif
 
 		count_tokens
 
