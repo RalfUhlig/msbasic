@@ -85,7 +85,7 @@ lcd_instruction:
   jsr lcd_send
   rts
 
-LCDPRINT:
+LCDCHR:
   jsr GETBYT
   txa
   jsr lcd_wait
