@@ -69,6 +69,9 @@ LCDINIT:
   jsr lcd_instruction
   rts
 
+LCDCLS:
+  lda #%00000001 ; Clear display
+  bne lcd_instruction
 LCDCMD:
   jsr GETBYT
   txa
