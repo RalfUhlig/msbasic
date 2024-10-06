@@ -84,8 +84,10 @@ lcd_instruction:
   lsr            ; Send high 4 bits
   jsr lcd_send
   pla
+  pha
   and #%00001111 ; Send low 4 bits
   jsr lcd_send
+  pla
   rts
 
 LCDCHR:
@@ -100,9 +102,11 @@ LCDCHR:
   ora #RS         ; Set RS
   jsr lcd_send
   pla
+  pha
   and #%00001111  ; Send low 4 bits
   ora #RS         ; Set RS
   jsr lcd_send
+  pla
   rts
 
 .endif
