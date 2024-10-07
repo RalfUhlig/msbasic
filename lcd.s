@@ -41,6 +41,23 @@ lcd_send:
   sta PORTB
   rts
 
+lcd_print_char:
+  jsr lcd_wait
+  pha
+  lsr
+  lsr
+  lsr
+  lsr             ; Send high 4 bits
+  ora #RS         ; Set RS
+  jsr lcd_send
+  pla
+  pha
+  and #%00001111  ; Send low 4 bits
+  ora #RS         ; Set RS
+  jsr lcd_send
+  pla
+  rts
+
 LCDINIT:
   lda #%11111111 ; Set all pins of port B to output
   sta DDRB
@@ -69,9 +86,6 @@ LCDINIT:
   jsr lcd_instruction
   rts
 
-LCDCLS:
-  lda #%00000001 ; Clear display
-  bne lcd_instruction
 LCDCMD:
   jsr GETBYT
   txa
@@ -90,23 +104,25 @@ lcd_instruction:
   pla
   rts
 
-LCDCHR:
-  jsr GETBYT
-  txa
-  jsr lcd_wait
-  pha
-  lsr
-  lsr
-  lsr
-  lsr             ; Send high 4 bits
-  ora #RS         ; Set RS
-  jsr lcd_send
-  pla
-  pha
-  and #%00001111  ; Send low 4 bits
-  ora #RS         ; Set RS
-  jsr lcd_send
-  pla
+LCDPRINT:
+  jsr FRMEVL            ; Evaluate formular
+  bit VALTYP            ; Is it a string?
+  bmi lcd_print_string  ; Yes
+  jsr FOUT              ; Format floating point output
+  jsr STRLIT            ; Build string descriptor
+lcd_print_string:
+  jsr FREFAC            ; Returns temp pointer to string
+  tax                   ; Put count to counter
+  ldy #0
+  inx                   ; Move one ahead
+lcd_print_next:
+  dex
+  beq lcd_print_end     ; All done
+  lda (INDEX),y         ; Load char of string
+  jsr lcd_print_char    ; Output to lcd
+  iny
+  bne lcd_print_next    ; Go on with next char
+lcd_print_end:
   rts
 
 .endif
