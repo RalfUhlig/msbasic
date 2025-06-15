@@ -80,6 +80,7 @@
 .ifdef BB6502
 		keyword_rts "LCDCMD", LCDCMD
 		keyword_rts "LCDPRINT", LCDPRINT
+		keyword_rts "BEEP", BEEP
 .endif
 		keyword_rts "NEW", NEW
 
