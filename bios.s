@@ -16,6 +16,10 @@ ACIA_STATUS = $5001 ; 6551 Status Register.
 ACIA_CMD = $5002 ; 6551 Command Register.
 ACIA_CTRL = $5003 ; 6551 Control Register.
 
+T1LL = $6006 ; 6522 Timer 1 Latch Low
+T1LH = $6007 ; 6522 Timer 1 Latch High
+IFR = $600D ; 6522 Interrupt Flag Register
+
 ; Dummy function for LOAD.
 LOAD:
                 RTS
@@ -100,8 +104,9 @@ BUFFER_SIZE:
 ; Interrupt request handler.
 IRQ_HANDLER:
                 PHA
-                LDA ACIA_STATUS   ; Reset interrupt flag.
-                ; For now, assume the only source of interrupts in the ACIA.
+                PHX
+                LDA ACIA_STATUS   ; Reset interrupt flag of ACIA.
+                BPL @NOT_FULL     ; Skip if not ACIA interrupr.
                 LDA ACIA_DATA     ; Read character from seriel interface.
                 JSR WRITE_BUFFER  ; Store character in the buffer.
                 JSR BUFFER_SIZE   ; Check if the buffer is mostly full.
@@ -111,6 +116,22 @@ IRQ_HANDLER:
                 AND #$FE
                 STA ACIA_CMD
 @NOT_FULL:
+                LDA IFR
+                BPL @IRQ_EXIT     ; No interrupt from 6522
+                LDA PORTB         ; PB7 will be th current sound phase.
+                BMI @SND2         ; if PB7 is set, set time to SND2.
+                LDA SND1+1        ; otherwise set timer to SND1.
+                STA T1LL
+                LDA SND1
+                STA T1LH
+                JMP @IRQ_EXIT
+@SND2:
+                LDA SND2+1
+                STA T1LL
+                LDA SND2
+                STA T1LH
+@IRQ_EXIT:
+                PLX
                 PLA
                 RTI
 
