@@ -36,7 +36,7 @@ BEEP:
   jsr MKINT
   lda FAC+4
   sta SND2+1
-  lda FAC
+  lda FAC+3
   sta SND2
 
 @silent:

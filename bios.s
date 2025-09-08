@@ -118,8 +118,8 @@ IRQ_HANDLER:
 @NOT_FULL:
                 LDA IFR
                 BPL @IRQ_EXIT     ; No interrupt from 6522
-                LDA PORTB         ; PB7 will be th current sound phase.
-                BMI @SND2         ; if PB7 is set, set time to SND2.
+                LDA PORTB         ; PB7 will be the current sound phase.
+                BPL @SND2         ; if PB7 is unset, set time to SND2.
                 LDA SND1+1        ; otherwise set timer to SND1.
                 STA T1LL
                 LDA SND1
