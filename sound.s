@@ -60,7 +60,7 @@ BEEP:
   ; Stop square wave to turn off sound.
   lda #0
   sta ACR
-  lda #$40    ; Diabel timer interrupts.
+  lda #$40    ; Diable timer interrupts.
   sta IER
 
 @done:
